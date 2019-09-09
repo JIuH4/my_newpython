@@ -18,7 +18,7 @@ class User:
     def add_friends(self, new_friend_s):
         if isinstance(new_friend_s, list):
             self.friends += new_friend_s
-        else:
+        elif isinstance(new_friend_s, User):
             self.friends.append(new_friend_s)
 
 
