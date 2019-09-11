@@ -31,40 +31,22 @@ class User(Avatar, PremiumMode):
         return len(self.friends)
 
     def __lt__(self, other):
-        if self.__len__() < len(other):
-            return True
-        else:
-            return False
+        return self.__len__() < len(other)
 
     def __gt__(self, other):
-        if self.__len__() > len(other):
-            return True
-        else:
-            return False
+        return self.__len__() > len(other)
 
     def __eq__(self, other):
-        if self.__len__() == len(other):
-            return True
-        else:
-            return False
+        return self.__len__() == len(other)
 
     def __le__(self, other):
-        if self.__len__() <= len(other):
-            return True
-        else:
-            return False
+        return self.__len__() <= len(other)
 
     def __ge__(self, other):
-        if self.__len__() >= len(other):
-            return True
-        else:
-            return False
+        return self.__len__() >= len(other)
 
     def __ne__(self, other):
-        if self.__len__() != len(other):
-            return True
-        else:
-            return False
+        return self.__len__() != len(other)
 
     def get_age(self):
         return ceil((datetime.date.today() - self.date_of_birth).days / 365)
