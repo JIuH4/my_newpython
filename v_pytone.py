@@ -1,5 +1,6 @@
 import datetime
 from math import ceil
+import csv
 
 
 class Avatar:
@@ -107,6 +108,14 @@ class SocialNetwork:
             except IndexError:
                 print("takogo usera net")
 
+    def export_csv(self):
+        with open("vpit.csv", "wt") as f:
+            w = csv.DictWriter(f, ["name", "datetime"])
+            w.writeheader()
+
+            for user in self.users:
+                w.writerow(dict(name=user.name, datetime=str(user.date_of_birth)))
+
     def __getitem__(self, item):
         return list(map(lambda x: str(x), list(filter(lambda x: x.name == item, self.users))))
 
@@ -151,3 +160,4 @@ print(user4 == user5)
 sn.add_user([user1, user2, user3, user4, user5])
 
 print(sn["Chuck"])
+sn.export_csv()
