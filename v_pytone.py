@@ -1,6 +1,8 @@
 import datetime
 from math import ceil
 import csv
+import networkx as nx
+import matplotlib.pyplot as plt
 
 
 class Avatar:
@@ -23,47 +25,12 @@ class User(Avatar, PremiumMode):
     def __init__(self, name, date_of_birth):
         self.name = name
         self.date_of_birth = date_of_birth
-        self.friends = []
-
-    def __str__(self):
-        return f"{self.name}  {self.date_of_birth}"
-
-    def __len__(self):
-        return len(self.friends)
-
-    def __lt__(self, other):
-        return self.__len__() < len(other)
-
-    def __gt__(self, other):
-        return self.__len__() > len(other)
-
-    def __eq__(self, other):
-        return self.__len__() == len(other)
-
-    def __le__(self, other):
-        return self.__len__() <= len(other)
-
-    def __ge__(self, other):
-        return self.__len__() >= len(other)
-
-    def __ne__(self, other):
-        return self.__len__() != len(other)
 
     def get_age(self):
         return ceil((datetime.date.today() - self.date_of_birth).days / 365)
 
-    def get_friends(self):
-        return self.friends
-
-    def add_friends(self, new_friend_s):
-
-        if isinstance(new_friend_s, list):
-            for user in new_friend_s:
-                if isinstance(user, User):
-                    if self.friends.count(user) == 0 and self != user:
-                        self.friends.append(user)
-        elif isinstance(new_friend_s, User):
-            self.friends.append(new_friend_s)
+    def __str__(self):
+        return self.name
 
 
 class Author(User):
@@ -87,37 +54,50 @@ class SocialNetwork:
 
     def __init__(self):
         self.users = []
+        self.users = nx.Graph()
 
     def add_user(self, new_user_s):
-
         if isinstance(new_user_s, list):
             for user in new_user_s:
-                if isinstance(user, Author):
-                    if len(list(filter(lambda x: x.name == user.name and user.date_of_birth == x.date_of_birth,
-                                       self.users))) == 0:
-                        self.users.append(user)
-        elif isinstance(new_user_s, Author):
-            if len(list(filter(lambda x: x.name == user.name and user.date_of_birth == x.date_of_birth,
-                               self.users))) == 0:
-                self.users.append(new_user_s)
+                if isinstance(user, User):
+                    self.users.add_node(user.name, user=new_user_s)
+        elif isinstance(new_user_s, User):
+            self.users.add_node(new_user_s.name, user=new_user_s)
 
-    def remove_user(self, index):
-        if isinstance(index, int):
-            try:
-                self.users.pop(index)
-            except IndexError:
-                print("takogo usera net")
+    def add_friend(self, name_of_first_friend: str, name_of_second_friend: str):
+        self.users.add_edge(name_of_first_friend, name_of_second_friend)
 
-    def export_csv(self):
-        with open("vpit.csv", "wt") as f:
-            w = csv.DictWriter(f, ["name", "datetime"])
-            w.writeheader()
+    def recomend_friend(self, name: str):
+        friends = list(nx.neighbors(self.users, name))
+        result = set()
 
-            for user in self.users:
-                w.writerow(dict(name=user.name, datetime=str(user.date_of_birth)))
+        for friend in friends:
+            for n in nx.neighbors(self.users, friend):
+                if n != name:
+                    result.add(n)
 
-    def __getitem__(self, item):
-        return list(map(lambda x: str(x), list(filter(lambda x: x.name == item, self.users))))
+        return result.difference(set(friends))
+
+
+def remove_user(self, name: str):
+    if isinstance(name, str):
+        try:
+            self.users.remove_node(name)
+        except IndexError:
+            print("takogo usera net")
+
+
+def export_csv(self):
+    with open("vpit.csv", "wt") as f:
+        w = csv.DictWriter(f, ["name", "datetime"])
+        w.writeheader()
+
+        for user in self.users.nodes:
+            w.writerow(dict(name=user.name, datetime=str(user.date_of_birth)))
+
+
+# def __getitem__(self, item):
+#     return list(map(lambda x: str(x), list(filter(lambda x: x.name == item, self.users.nodes))))
 
 
 sn = SocialNetwork()
@@ -125,39 +105,23 @@ sn = SocialNetwork()
 user1 = Author("Poul", datetime.date(1987, 11, 2))
 user2 = Author("Ben", datetime.date(1983, 2, 10))
 user3 = Author("Chuck", datetime.date(1980, 1, 20))
-user4 = Author("Chuck", datetime.date(1980, 1, 21))
-user5 = Author("Chuck", datetime.date(1980, 1, 22))
-
-user1.add_friends([user1, user2, user3, user3, "DSFA"])
-user2.add_friends([user1, user2, user3, user3, "DSFA"])
-# user3.add_friends([user1, user2, user3, user3, "DSFA"])
-
-print(user1.name, user1.get_age(), [u.name for u in user1.friends])
-print(user2.name, user2.get_age(), [u.name for u in user2.friends])
-print(user3.name, user3.get_age(), [u.name for u in user3.friends])
-
-user1.add_post("11")
-user1.add_post("22")
-user1.add_post("33")
-
-user1.remove_post(1)
-user1.remove_post(6)
-
-print(user1.posts)
+user4 = Author("Chuck2", datetime.date(1980, 1, 21))
+user5 = Author("Chuck3", datetime.date(1980, 1, 22))
 
 user1.add_avatar("avatar1")
 user1.add_premium_mode()
 user2.add_avatar("avatar2")
 user2.add_premium_mode()
 
-print(user1.avatar_url, user1.premium_enabled)
-print(user2.avatar_url, user2.premium_enabled)
-print(user3.avatar_url, user3.premium_enabled)
-print(user1)
-print(user1 < user3)
-print(user3 > user1)
-print(user4 == user5)
 sn.add_user([user1, user2, user3, user4, user5])
+sn.add_friend(user1.name, user3.name)
+sn.add_friend(user1.name, user5.name)
+sn.add_friend(user2.name, user3.name)
+sn.add_friend(user4.name, user5.name)
+sn.add_friend(user3.name, user4.name)
+sn.add_friend(user3.name, user5.name)
 
-print(sn["Chuck"])
-sn.export_csv()
+nx.draw_networkx(sn.users)
+plt.show()
+
+print([n for n in sn.recomend_friend("Poul")])
