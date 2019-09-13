@@ -100,7 +100,7 @@ class SocialNetwork:
         friends = list(nx.neighbors(self.users, name))
         result = set()
 
-        for friend in friends:
+        for friend in friends:1
             for n in nx.neighbors(self.users, friend):
                 if n != name:
                     result.add(n)
