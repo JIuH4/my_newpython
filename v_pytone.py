@@ -96,7 +96,7 @@ class SocialNetwork:
     def add_friend(self, name_of_first_friend: str, name_of_second_friend: str):
         self.users.add_edge(name_of_first_friend, name_of_second_friend)
 
-    def recomend_friend(self, name: str):
+    def recomend_friend(sel1f, name: str):
         friends = list(nx.neighbors(self.users, name))
         result = set()
 
